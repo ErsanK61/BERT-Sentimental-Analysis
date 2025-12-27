@@ -70,7 +70,7 @@ def stars_bar(stars: int) -> str:
     return "★" * stars + "☆" * (5 - stars)
 
 
-# UI
+# UI LEET CODE
 
 with st.container(border=True):
     st.subheader("📝 Rezension eingeben")
@@ -99,7 +99,7 @@ st.divider()
 if analyze:
     text = (review or "").strip()
     if len(text) < 5:
-        st.info("Bitte gib eine etwas längere Rezension ein (mind. ~5 Zeichen).")
+        st.info("Bitte gib eine etwas längere Rezension ein (mind. 5 Zeichen).")
     else:
         # Truncation to avoid super long input
         out = sentiment_model(text[:512], truncation=True)[0]

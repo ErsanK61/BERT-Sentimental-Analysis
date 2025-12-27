@@ -7,25 +7,20 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from transformers import pipeline
 
-
+#Dataset wird geladen
 print(get_dataset_config_names("buruzaemon/amazon_reviews_multi"))
 
-ds = load_dataset("buruzaemon/amazon_reviews_multi", "de", split="test")
+ds = load_dataset("buruzaemon/amazon_reviews_multi", "de", split="test") # deutscher Split
 
-def stars_to_sentiment(stars):
-    if stars >= 4:
-        return "Positiv"
-    elif stars == 3:
-        return "Neutral"
-    else:
-        return "Negativ"
 
+
+#initialisierung von BERT
 sentiment_model = pipeline(
     "sentiment-analysis",
     model="nlptown/bert-base-multilingual-uncased-sentiment"
 )
 
-
+#Streamlit Einstellungen Kopfteil
 st.set_page_config(
     page_title="Amazon Review Sentiment (BERT)",
     page_icon="⭐",
@@ -35,17 +30,18 @@ st.set_page_config(
 st.title("⭐ Amazon-Review Klassifikation (BERT)")
 st.caption("Text rein → Sterne + Stimmung raus (ohne manuelles Lesen)")
 
-
+# Modell Caching in Streamlit für die Performance (damit BERT nicht jedesmal neu geladen wird)
 @st.cache_resource
 def load_model():
     return pipeline(
         "sentiment-analysis",
         model="nlptown/bert-base-multilingual-uncased-sentiment"
     )
-
+# Ich überschreibe sentiment_model absichtlich mit der gecachten Variante
+# damit das Programm nicht bei jeder Interaktion neu initialisiert.
 sentiment_model = load_model()
 
-
+#Ab wie vielen Sternen welche Stimmung ist
 def stars_to_sentiment(stars: int) -> str:
     if stars >= 4:
         return "Positiv"
@@ -53,6 +49,7 @@ def stars_to_sentiment(stars: int) -> str:
         return "Neutral"
     return "Negativ"
 
+#Emojis für Ergebnis
 def sentiment_style(sentiment: str):
     # returns (emoji, streamlit color keyword)
     if sentiment == "Positiv":
@@ -61,12 +58,10 @@ def sentiment_style(sentiment: str):
         return "🟨", "warning"
     return "❌", "error"
 
-def parse_stars(label: str) -> int:
-    # label like: "4 stars" or "1 star"
+def parse_stars(label: str) -> int: #Extrahiert Sternezahl aus dem Modell
     return int(label.split()[0])
 
-def stars_bar(stars: int) -> str:
-    # Visual stars: ★★★★☆
+def stars_bar(stars: int) -> str: #visuelle Sterneanzeige
     return "★" * stars + "☆" * (5 - stars)
 
 
@@ -94,25 +89,29 @@ if st.session_state.get("_clear"):
 st.divider()
 
 
-# Run inference
+# Text -> Sterne + Stimmung + Score
 
 if analyze:
     text = (review or "").strip()
     if len(text) < 5:
         st.info("Bitte gib eine etwas längere Rezension ein (mind. 5 Zeichen).")
     else:
-        # Truncation to avoid super long input
+        # Das Modell arbeitet stabiler wenn sehr lange Texte gekürzt werden
+        # truncation=True sorgt zusätzlich dafür, dass Token-Limits nicht überschritten werden.
+        #Output des Modells
         out = sentiment_model(text[:512], truncation=True)[0]
         pred_stars = parse_stars(out["label"])
         pred_sentiment = stars_to_sentiment(pred_stars)
         score = float(out["score"])
 
+        # Darstellungselemente für UI
+
         emoji, level = sentiment_style(pred_sentiment)
 
-        # Nice result card
+        # Ergebnisanzeige
         st.subheader("📌 Ergebnis")
         with st.container(border=True):
-            # Top row metrics
+            # Ergebnis Anzeige Metriken
             c1, c2, c3 = st.columns([1.2, 1.2, 1.2])
             c1.metric("Geschätzte Sterne", f"{pred_stars}/5")
             c2.metric("Stimmung", f"{emoji} {pred_sentiment}")
@@ -121,7 +120,7 @@ if analyze:
             st.write("**Sternanzeige:**", stars_bar(pred_stars))
             st.progress(min(max(score, 0.0), 1.0))
 
-            # Color-coded message
+            # Farben
             if level == "success":
                 st.success(f"Das klingt insgesamt **positiv** (≈ {pred_stars} Sterne).")
             elif level == "warning":
@@ -131,5 +130,3 @@ if analyze:
 
 
 
-# Footer
-st.caption("Modell: nlptown/bert-base-multilingual-uncased-sentiment (BERT).")

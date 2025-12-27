@@ -12,6 +12,7 @@ ds = load_dataset("buruzaemon/amazon_reviews_multi", "de", split="test")
 # Indizes nach Klassen sammeln
 class_indices = defaultdict(list)
 
+#BERT
 sentiment_model = pipeline(
     "sentiment-analysis",
     model="nlptown/bert-base-multilingual-uncased-sentiment")
@@ -27,7 +28,7 @@ for i in range(len(ds)):
     label = stars_to_sentiment(ds[i]["stars"])
     class_indices[label].append(i)
 
-# gleiche Anzahl pro Klasse
+# gleiche Anzahl an Daten pro Klasse
 k = 600
 indices = (
     class_indices["Negativ"][:k] +

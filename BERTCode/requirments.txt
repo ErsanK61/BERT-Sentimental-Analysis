@@ -1,0 +1,7 @@
+transformers==4.44.2
+datasets==2.19.1
+scikit-learn
+evaluate
+pandas
+matplotlib
+streamlit

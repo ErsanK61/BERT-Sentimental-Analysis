@@ -46,7 +46,7 @@ for text in texts:
     predicted_stars = int(out["label"].split()[0])
     pred_labels.append(stars_to_sentiment(predicted_stars))
 
-# Assuming accuracy_score is imported from sklearn.metrics
+# Accuracy wird angezeigt mit Confusion Matrix / evaluierung
 from sklearn.metrics import accuracy_score
 accuracy = accuracy_score(true_labels, pred_labels)
 print("Balanced Accuracy:", accuracy)

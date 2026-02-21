@@ -7,8 +7,11 @@ Das Modell analysiert ausschließlich den Textinhalt einer Rezension und sagt ei
 Projektüberblick:
 
 -Verwendung eines vortrainierten Transformer-Modells
+
 -Textklassifikation mit BERT (Encoder only Architektur)
+
 -Evaluation von BERT mit balancierten Klassen
+
 -Interaktive Web Anwendung mit Streamlit
 
 Modell:
